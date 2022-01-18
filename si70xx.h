@@ -52,7 +52,9 @@ DUMB_STATIC_ASSERT(sizeof(si70xx_hcr_t) == 1);
 typedef struct __attribute__((packed)) {				// SI70006/13/14/20/xx TMP & RH sensors
 	i2c_di_t *		psI2C;			// 4 bytes
 	SemaphoreHandle_t mux ;
+#if (si70xxI2C_LOGIC == 3)
 	TimerHandle_t	timer ;
+#endif
 	union {
 		si70xx_ur1_t sUR1;			// 1 byte
 		uint8_t UR1;
@@ -66,7 +68,11 @@ typedef struct __attribute__((packed)) {				// SI70006/13/14/20/xx TMP & RH sens
 		uint8_t		u8Buf[2];
 	};
 } si70xx_t;
-DUMB_STATIC_ASSERT(sizeof(si70xx_t) == 16);
+#if (si70xxI2C_LOGIC == 3)
+	DUMB_STATIC_ASSERT(sizeof(si70xx_t) == 16);
+#else
+	DUMB_STATIC_ASSERT(sizeof(si70xx_t) == 12);
+#endif
 
 // ###################################### Public variables #########################################
 
