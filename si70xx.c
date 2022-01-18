@@ -13,10 +13,11 @@
 #include	"systiming.h"					// timing debugging
 #include	"x_errors_events.h"
 
-#define	debugFLAG					0xF003
+#define	debugFLAG					0xF000
 
 #define	debugCONFIG					(debugFLAG & 0x0001)
 #define	debugCONVERT				(debugFLAG & 0x0002)
+#define	debugMODE					(debugFLAG & 0x0004)
 
 #define	debugTIMING					(debugFLAG_GLOBAL & debugFLAG & 0x1000)
 #define	debugTRACK					(debugFLAG_GLOBAL & debugFLAG & 0x2000)
@@ -28,7 +29,7 @@
 
 // ############################################# Macros ############################################
 
-#define	si70xxI2C_LOGIC				0					// 0 = delay, 1= stretch, 2= stages
+#define	si70xxI2C_LOGIC				1					// 1=delay 2=stretch, 3=stages
 
 // #################################### SI7006/13/20/21 Addresses ##################################
 
@@ -102,13 +103,13 @@ int si70xxModeGet(void) {
 }
 
 
-#if (si70xxI2C_LOGIC == 0)
+#if (si70xxI2C_LOGIC == 1)
+
 /**
  * @brief	trigger A->D conversion with clock stretching
  * @param 	pointer to endpoint to be read
  */
 int	si70xxReadHdlr(epw_t * psEWP) {
-	IF_TT(debugTIMING, "A\n");
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 1;
 	const uint8_t * pCMD = (psEWP == &table_work[URI_SI70XX_RH]) ? &si70xxMRH_HMM : &si70xxMT_HMM;
 	uint8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
@@ -132,13 +133,13 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	return iRV;
 }
 
-#elif (si70xxI2C_LOGIC == 1)
+#elif (si70xxI2C_LOGIC == 2)
+
 /**
  * @brief	trigger A->D conversion with clock stretching
  * @param 	pointer to endpoint to be read
  */
 int	si70xxReadHdlr(epw_t * psEWP) {
-	IF_TT(debugTIMING, "A\n");
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 1;
 	const uint8_t * pCMD = (psEWP == &table_work[URI_SI70XX_RH]) ? &si70xxMRH_HMM : &si70xxMT_HMM;
 	IF_SYSTIMER_START(debugTIMING, stSI70XX);
@@ -158,7 +159,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	return iRV;
 }
 
-#elif (si70xxI2C_LOGIC == 2)
+#elif (si70xxI2C_LOGIC == 3)
 
 /**
  * @brief	step 3: sample read, convert  store
@@ -198,7 +199,6 @@ void si70xxTimerHdlr(TimerHandle_t xTimer) {
  * @param 	pointer to endpoint to be read
  */
 int	si70xxReadHdlr(epw_t * psEWP) {
-	IF_TT(debugTIMING, "A\n");
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 1;
 	vTimerSetTimerID(sSI70XX.timer, (void *) psEWP);
 	uint8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
@@ -208,8 +208,6 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	IF_SYSTIMER_START(debugTIMING, stSI70XX);
 	return halI2C_Queue(sSI70XX.psI2C, i2cWT, (uint8_t *) pCMD, 1, NULL, 0, (i2cq_p1_t) sSI70XX.timer, (i2cq_p2_t) (uint32_t) Dly);
 }
-#else
-	#error " Invalid si70xxI2C_LOGIC value"
 #endif
 
 // ################################ Rules configuration support ####################################
@@ -220,7 +218,7 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 	int res = psR->para.x32[AI][0].i32;
 	int htr = psR->para.x32[AI][1].i32;
 	int lev = psR->para.x32[AI][2].i32;
-	IF_PRINT(debugCONFIG && ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\n", Xcur, Xmax, res, htr, lev);
+	IF_PRINT(debugMODE && ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\n", Xcur, Xmax, res, htr, lev);
 
 	if (OUTSIDE(0, res, 3, int) || OUTSIDE(0, htr, 1, int) || OUTSIDE(0, lev, 15, int))
 		ERR_RETURN("Invalid Resolution or Heater value", erSCRIPT_INV_PARA);
@@ -298,10 +296,10 @@ int	si70xxConfig(i2c_di_t * psI2C_DI) {
 	psEWP->var.def.cv.vt = vtVALUE;
 	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
 	psEWP->uri = URI_SI70XX_TMP;
-#if (si70xxI2C_LOGIC == 2)
+#if (si70xxI2C_LOGIC == 3)
 	sSI70XX.timer = xTimerCreate("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr);
 #endif
-	IF_SYSTIMER_INIT(debugTIMING, stSI70XX, stMILLIS, "SI70XX", 1, 300);
+	IF_SYSTIMER_INIT(debugTIMING, stSI70XX, stMICROS, "SI70XX", 100, 10000);
 
 	si70xxModeGet();
 	si70xxModeSet(si70xxMODE_H08T12);
@@ -314,15 +312,18 @@ int	si70xxDiags(i2c_di_t * psI2C_DI) { return erSUCCESS; }
 
 // ######################################### Reporting #############################################
 
-const char * caMode[] = { "Humd12 - Temp14", "Humd8 - Temp12", "Humd10 - Temp13", "Humd11 - Temp11" };
+const char * caMode[] = { "H12T14", "H08T12", "H10T13", "H11T11" };
 const char * caLevel[] = { "3.09", "9.18", "15.24", "", "27.39", "", "", "", "51.69", "", "", "", "", "", "", "94.20" };
 
 void si70xxReportAll(void) {
 	for (int dev = 0; dev < si70xxNumDev; ++dev) {
+		halI2C_DeviceReport(sSI70XX.psI2C);
 		uint8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
 		Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
-		PRINT("#%d - A=0x%02X (SI70XX) M=%d (%s) V=%d H=%d L=%d (%s)\n",
-			dev, sSI70XX.psI2C->Addr, Cfg, caMode[Cfg], sSI70XX.sUR1.vdds,
-			sSI70XX.sUR1.htre, sSI70XX.sHCR.level, caLevel[sSI70XX.sHCR.level]);
+		PRINT("\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\n",
+			Cfg, caMode[Cfg],
+			sSI70XX.sUR1.vdds,
+			sSI70XX.sUR1.htre  ? "EN" : "DIS",
+			sSI70XX.sHCR.level, caLevel[sSI70XX.sHCR.level]);
 	}
 }
