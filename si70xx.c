@@ -208,6 +208,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	IF_SYSTIMER_START(debugTIMING, stSI70XX);
 	return halI2C_Queue(sSI70XX.psI2C, i2cWT, (uint8_t *) pCMD, 1, NULL, 0, (i2cq_p1_t) sSI70XX.timer, (i2cq_p2_t) (uint32_t) Dly);
 }
+
 #endif
 
 // ################################ Rules configuration support ####################################
@@ -247,8 +248,8 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
  */
 int	si70xxIdentify(i2c_di_t * psI2C_DI) {
 	uint8_t	si70xxBuf[10];
-	psI2C_DI->Delay	= 50;
-	psI2C_DI->TOuS = 13000;			// Max 13000 (13mS)
+	psI2C_DI->TRXmS	= 50;
+	psI2C_DI->CLKuS = 13000;			// Max 13000 (13mS)
 	psI2C_DI->Test = 1;
 	sSI70XX.psI2C = psI2C_DI;
 	int iRV = si70xxWriteRead(si70xxREID1, sizeof(si70xxREID1), &si70xxBuf[0], 8);
