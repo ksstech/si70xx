@@ -24,9 +24,6 @@
 #define	debugPARAM					(debugFLAG_GLOBAL & debugFLAG & 0x4000)
 #define	debugRESULT					(debugFLAG_GLOBAL & debugFLAG & 0x8000)
 
-// ##################################### Developer notes ###########################################
-
-
 // ############################################# Macros ############################################
 
 #define	si70xxI2C_LOGIC				1					// 1=delay 2=stretch, 3=stages
