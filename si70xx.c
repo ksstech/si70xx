@@ -219,7 +219,7 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 	IF_PRINT(debugMODE && ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\n", Xcur, Xmax, res, htr, lev);
 
 	if (OUTSIDE(0, res, 3, int) || OUTSIDE(0, htr, 1, int) || OUTSIDE(0, lev, 15, int))
-		ERR_RETURN("Invalid Resolution or Heater value", erSCRIPT_INV_PARA);
+		ERR_RETURN("Invalid Resolution or Heater value", erINVALID_PARA);
 
 	int iRV;
 	do {
