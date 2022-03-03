@@ -126,7 +126,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 		X64.x32[0].f32 = (((float) sSI70XX.RawVal * 175.72) / 65536.0) - 46.85;
 	vCV_SetValue(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
-	IF_PRINT(debugCONVERT, "  Raw=%d  Norm=%f\n", sSI70XX.RawVal, X64.x32[0].f32);
+	IF_P(debugCONVERT, "  Raw=%d  Norm=%f\n", sSI70XX.RawVal, X64.x32[0].f32);
 	return iRV;
 }
 
@@ -152,7 +152,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 		X64.x32[0].f32 = (((float) sSI70XX.RawVal * 175.72) / 65536.0) - 46.85;
 	vCV_SetValue(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
-	IF_PRINT(debugCONVERT, "  Raw=%d  Norm=%f\n", sSI70XX.RawVal, X64.x32[0].f32);
+	IF_P(debugCONVERT, "  Raw=%d  Norm=%f\n", sSI70XX.RawVal, X64.x32[0].f32);
 	return iRV;
 }
 
@@ -167,7 +167,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	epw_t * psEWP = pvPara;
 	IF_PT(debugCONVERT, "uri=%d  [ %-'B ]", psEWP->uri, SO_MEM(si70xx_t, u8Buf), sSI70XX.u8Buf);
 	sSI70XX.RawVal = (sSI70XX.u8Buf[0] << 8) + sSI70XX.u8Buf[1];
-	IF_PRINT(debugCONVERT, "  Raw=%d", sSI70XX.RawVal);
+	IF_P(debugCONVERT, "  Raw=%d", sSI70XX.RawVal);
 	x64_t X64;
 	if (psEWP == &table_work[URI_SI70XX_RH]) {
 //		IF_myASSERT(debugRESULT, (sSI70XX.RawVal & 0x0003) == 0x0002);
@@ -179,7 +179,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	}
 	vCV_SetValue(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
-	IF_PRINT(debugCONVERT, "  Norm=%f\n", X64.x32[0].f32);
+	IF_P(debugCONVERT, "  Norm=%f\n", X64.x32[0].f32);
 }
 
 /**
@@ -216,7 +216,7 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 	int res = psR->para.x32[AI][0].i32;
 	int htr = psR->para.x32[AI][1].i32;
 	int lev = psR->para.x32[AI][2].i32;
-	IF_PRINT(debugMODE && ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\n", Xcur, Xmax, res, htr, lev);
+	IF_P(debugMODE && ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\n", Xcur, Xmax, res, htr, lev);
 
 	if (OUTSIDE(0, res, 3, int) || OUTSIDE(0, htr, 1, int) || OUTSIDE(0, lev, 15, int))
 		ERR_RETURN("Invalid Resolution or Heater value", erINVALID_PARA);
@@ -262,16 +262,16 @@ int	si70xxIdentify(i2c_di_t * psI2C_DI) {
 	#if (debugCONFIG)
 	si70xxBuf[6] = si70xxBuf[7];
 	si70xxBuf[7] = si70xxBuf[8];
-	IF_PRINT(debugCONFIG, "si70xx ID [ %-'B ]", 8, si70xxBuf);
+	IF_P(debugCONFIG, "si70xx ID [ %-'B ]", 8, si70xxBuf);
 	#endif
 	if ((iRV == erSUCCESS) && (si70xxBuf[4] == 0x06)) {
 		psI2C_DI->Type		= i2cDEV_SI70XX;
 		psI2C_DI->Speed		= i2cSPEED_400;
 		psI2C_DI->DevIdx 	= si70xxNumDev++ ;
-	#if (debugCONFIG)
+		#if (debugCONFIG)
 		si70xxWriteRead(si70xxRFWR, sizeof(si70xxRFWR), si70xxBuf, 1);
-		PRINT("  FW Rev=%d\n", si70xxBuf[0] == 0xFF ? 1 : si70xxBuf[0] == 0x20 ? 2 : -1);
-	#endif
+		P("  FW Rev=%d\n", si70xxBuf[0] == 0xFF ? 1 : si70xxBuf[0] == 0x20 ? 2 : -1);
+		#endif
 	}
 exit:
 //	psI2C_DI->Test = 0;				// Leave ON to remove timeout errors
@@ -318,7 +318,7 @@ void si70xxReportAll(void) {
 		halI2C_DeviceReport(sSI70XX.psI2C);
 		uint8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
 		Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
-		PRINT("\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\n",
+		P("\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\n",
 			Cfg, caMode[Cfg],
 			sSI70XX.sUR1.vdds,
 			sSI70XX.sUR1.htre  ? "EN" : "DIS",
