@@ -218,9 +218,11 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 	int lev = psR->para.x32[AI][2].i32;
 	IF_P(debugMODE && ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\n", Xcur, Xmax, res, htr, lev);
 
-	if (OUTSIDE(0, res, 3, int) || OUTSIDE(0, htr, 1, int) || OUTSIDE(0, lev, 15, int))
-		ERR_RETURN("Invalid Resolution or Heater value", erINVALID_PARA);
-
+	if (OUTSIDE(0, res, 3, int) ||
+		OUTSIDE(0, htr, 1, int) ||
+		OUTSIDE(0, lev, 15, int)) {
+		RETURN_MX("Invalid Resolution or Heater value", erINVALID_PARA);
+	}
 	int iRV;
 	do {
 		sSI70XX.sUR1.cfg0 = (res & 0x01) ? 1 : 0;
@@ -250,9 +252,7 @@ int	si70xxIdentify(i2c_di_t * psI2C_DI) {
 	psI2C_DI->Test = 1;
 	sSI70XX.psI2C = psI2C_DI;
 	int iRV = si70xxWriteRead(si70xxREID1, sizeof(si70xxREID1), &si70xxBuf[0], 8);
-	if (iRV != erSUCCESS) {
-		goto exit;
-	}
+	IF_EXIT(iRV != erSUCCESS);
 	#if (debugCONFIG)
 	for (int i = 0; i < 8; i += 2) {
 		si70xxBuf[i >> 1] = si70xxBuf[i + 1];
