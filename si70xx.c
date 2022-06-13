@@ -126,7 +126,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 		X64.x32[0].f32 = (((float) sSI70XX.RawVal * 175.72) / 65536.0) - 46.85;
 	vCV_SetValue(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
-	IF_P(debugCONVERT, "  Raw=%d  Norm=%f\n", sSI70XX.RawVal, X64.x32[0].f32);
+	IF_P(debugCONVERT, "  Raw=%d  Norm=%f\r\n", sSI70XX.RawVal, X64.x32[0].f32);
 	return iRV;
 }
 
@@ -152,7 +152,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 		X64.x32[0].f32 = (((float) sSI70XX.RawVal * 175.72) / 65536.0) - 46.85;
 	vCV_SetValue(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
-	IF_P(debugCONVERT, "  Raw=%d  Norm=%f\n", sSI70XX.RawVal, X64.x32[0].f32);
+	IF_P(debugCONVERT, "  Raw=%d  Norm=%f\r\n", sSI70XX.RawVal, X64.x32[0].f32);
 	return iRV;
 }
 
@@ -179,7 +179,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	}
 	vCV_SetValue(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
-	IF_P(debugCONVERT, "  Norm=%f\n", X64.x32[0].f32);
+	IF_P(debugCONVERT, "  Norm=%f\r\n", X64.x32[0].f32);
 }
 
 /**
@@ -216,7 +216,7 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 	int res = psR->para.x32[AI][0].i32;
 	int htr = psR->para.x32[AI][1].i32;
 	int lev = psR->para.x32[AI][2].i32;
-	IF_P(debugMODE && ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\n", Xcur, Xmax, res, htr, lev);
+	IF_P(debugMODE && ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\r\n", Xcur, Xmax, res, htr, lev);
 
 	if (OUTSIDE(0, res, 3, int) ||
 		OUTSIDE(0, htr, 1, int) ||
@@ -270,7 +270,7 @@ int	si70xxIdentify(i2c_di_t * psI2C_DI) {
 		psI2C_DI->DevIdx 	= si70xxNumDev++ ;
 		#if (debugCONFIG)
 		si70xxWriteRead(si70xxRFWR, sizeof(si70xxRFWR), si70xxBuf, 1);
-		P("  FW Rev=%d\n", si70xxBuf[0] == 0xFF ? 1 : si70xxBuf[0] == 0x20 ? 2 : -1);
+		P("  FW Rev=%d\r\n", si70xxBuf[0] == 0xFF ? 1 : si70xxBuf[0] == 0x20 ? 2 : -1);
 		#endif
 	}
 exit:
@@ -318,7 +318,7 @@ void si70xxReportAll(void) {
 		halI2C_DeviceReport(sSI70XX.psI2C);
 		uint8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
 		Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
-		P("\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\n",
+		P("\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\r\n",
 			Cfg, caMode[Cfg],
 			sSI70XX.sUR1.vdds,
 			sSI70XX.sUR1.htre  ? "EN" : "DIS",
