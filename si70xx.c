@@ -108,7 +108,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	const u8_t * pCMD = (psEWP == &table_work[URI_SI70XX_RH]) ? &si70xxMRH_HMM : &si70xxMT_HMM;
 	u8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
 	Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
-	uint32_t Dly = (psEWP == &table_work[URI_SI70XX_RH]) ? si70xxDelayRH[Cfg] : si70xxDelayT[Cfg];
+	u32_t Dly = (psEWP == &table_work[URI_SI70XX_RH]) ? si70xxDelayRH[Cfg] : si70xxDelayT[Cfg];
 	Dly *= MICROS_IN_MILLISEC;
 	IF_SYSTIMER_START(debugTIMING, stSI70XX);
 	int iRV = halI2C_Queue(sSI70XX.psI2C, i2cWDR_B, (u8_t *) pCMD, sizeof(u8_t),
@@ -197,10 +197,10 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	vTimerSetTimerID(sSI70XX.timer, (void *) psEWP);
 	u8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
 	Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
-	uint32_t Dly = (psEWP == &table_work[URI_SI70XX_RH]) ? si70xxDelayRH[Cfg] : si70xxDelayT[Cfg];
+	u32_t Dly = (psEWP == &table_work[URI_SI70XX_RH]) ? si70xxDelayRH[Cfg] : si70xxDelayT[Cfg];
 	const u8_t * pCMD = (psEWP == &table_work[URI_SI70XX_RH]) ? &si70xxMRH_NHMM : &si70xxMT_NHMM;
 	IF_SYSTIMER_START(debugTIMING, stSI70XX);
-	return halI2C_Queue(sSI70XX.psI2C, i2cWT, (u8_t *) pCMD, 1, NULL, 0, (i2cq_p1_t) sSI70XX.timer, (i2cq_p2_t) (uint32_t) Dly);
+	return halI2C_Queue(sSI70XX.psI2C, i2cWT, (u8_t *) pCMD, 1, NULL, 0, (i2cq_p1_t) sSI70XX.timer, (i2cq_p2_t) (u32_t) Dly);
 }
 
 #endif
