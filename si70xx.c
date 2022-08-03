@@ -87,7 +87,7 @@ static int si70xxWriteRead(const u8_t * pTxBuf, size_t TxLen, u8_t * pRxBuf, siz
 }
 
 int si70xxModeSet(int Mode) {
-	IF_myASSERT(debugPARAM, INRANGE(si70xxMODE_H12T14, Mode, si70xxMODE_H11T11, int));
+	IF_myASSERT(debugPARAM, INRANGE(si70xxMODE_H12T14, Mode, si70xxMODE_H11T11));
 	sSI70XX.sUR1.cfg1 = (Mode & 2) ? 1 : 0;
 	sSI70XX.sUR1.cfg0 = (Mode & 1) ? 1 : 0;
 	return si70xxWriteReg(si70xxWUR1, sSI70XX.UR1);
@@ -215,9 +215,9 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 	int lev = psR->para.x32[AI][2].i32;
 	IF_P(ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\r\n", Xcur, Xmax, res, htr, lev);
 
-	if (OUTSIDE(0, res, 3, int) ||
-		OUTSIDE(0, htr, 1, int) ||
-		OUTSIDE(0, lev, 15, int)) {
+	if (OUTSIDE(0, res, 3) ||
+		OUTSIDE(0, htr, 1) ||
+		OUTSIDE(0, lev, 15)) {
 		RETURN_MX("Invalid Resolution or Heater value", erINVALID_PARA);
 	}
 	int iRV;
