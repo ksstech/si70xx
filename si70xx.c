@@ -121,7 +121,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 		X64.x32[0].f32 = (float) (((sSI70XX.RawVal * 125) >> 16) - 6);
 	else
 		X64.x32[0].f32 = (((float) sSI70XX.RawVal * 175.72) / 65536.0) - 46.85;
-	vCV_SetValue(&psEWP->var, X64);
+	vCV_SetValueRaw(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
 	IF_P(debugCONVERT, "  Raw=%d  Norm=%f\r\n", sSI70XX.RawVal, X64.x32[0].f32);
 	return iRV;
@@ -147,7 +147,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 		X64.x32[0].f32 = (float) (((sSI70XX.RawVal * 125) >> 16) - 6);
 	else
 		X64.x32[0].f32 = (((float) sSI70XX.RawVal * 175.72) / 65536.0) - 46.85;
-	vCV_SetValue(&psEWP->var, X64);
+	vCV_SetValueRaw(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
 	IF_P(debugCONVERT, "  Raw=%d  Norm=%f\r\n", sSI70XX.RawVal, X64.x32[0].f32);
 	return iRV;
@@ -174,7 +174,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 //		IF_myASSERT(debugRESULT, (sSI70XX.RawVal & 0x0003) == 0x0000);
 		X64.x32[0].f32 = (((float) sSI70XX.RawVal * 175.72) / 65536.0) - 46.85;
 	}
-	vCV_SetValue(&psEWP->var, X64);
+	vCV_SetValueRaw(&psEWP->var, X64);
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 0;
 	IF_P(debugCONVERT, "  Norm=%f\r\n", X64.x32[0].f32);
 }
@@ -218,7 +218,7 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 	if (OUTSIDE(0, res, 3) ||
 		OUTSIDE(0, htr, 1) ||
 		OUTSIDE(0, lev, 15)) {
-		RETURN_MX("Invalid Resolution or Heater value", erINVALID_PARA);
+		RETURN_MX("Invalid Resolution or Heater value", erINV_PARA);
 	}
 	int iRV;
 	do {
@@ -274,20 +274,15 @@ exit:
 
 int	si70xxConfig(i2c_di_t * psI2C_DI) {
 	epw_t * psEWP = &table_work[URI_SI70XX_RH];
-	psEWP->var.def.cv.vc = 1;
-	psEWP->var.def.cv.vs = vs32B;
-	psEWP->var.def.cv.vf = vfFXX;
-	psEWP->var.def.cv.vt = vtVALUE;
+	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1);
 	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
 	psEWP->uri = URI_SI70XX_RH;
 
 	psEWP = &table_work[URI_SI70XX_TMP];
-	psEWP->var.def.cv.vc = 1;
-	psEWP->var.def.cv.vs = vs32B;
-	psEWP->var.def.cv.vf = vfFXX;
-	psEWP->var.def.cv.vt = vtVALUE;
+	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1);
 	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
 	psEWP->uri = URI_SI70XX_TMP;
+
 	#if (si70xxI2C_LOGIC == 3)
 	sSI70XX.timer = xTimerCreate("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr);
 	#endif
