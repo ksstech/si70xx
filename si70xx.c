@@ -48,8 +48,8 @@
 u8_t const si70xxMRH_HMM 	= 0xE5;
 u8_t const si70xxMRH_NHMM	= 0xF5;
 u8_t const si70xxMT_HMM		= 0xE3;
-u8_t const si70xxMT_NHMM		= 0xF3;
-u8_t const si70xxRT_PMRH		= 0xE0;
+u8_t const si70xxMT_NHMM	= 0xF3;
+u8_t const si70xxRT_PMRH	= 0xE0;
 u8_t const si70xxRESET		= 0xFE;
 u8_t const si70xxWUR1		= 0xE6;
 u8_t const si70xxRUR1		= 0xE7;
@@ -57,7 +57,7 @@ u8_t const si70xxWHCR		= 0x51;
 u8_t const si70xxRHCR		= 0x11;
 u8_t const si70xxREID1[2]	= { 0xFA, 0x0F };
 u8_t const si70xxREID2[2]	= { 0xFC, 0xC9 };
-u8_t const si70xxRFWR[2]		= { 0x84, 0xB8 };
+u8_t const si70xxRFWR[2]	= { 0x84, 0xB8 };
 
 const u8_t si70xxDelayRH[4] = { 12+11, 4+4, 5+7, 7+3};
 const u8_t si70xxDelayT[4] = { 11, 4, 7, 3};
@@ -194,13 +194,13 @@ void si70xxTimerHdlr(TimerHandle_t xTimer) {
  */
 int	si70xxReadHdlr(epw_t * psEWP) {
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 1;
-	vTimerSetTimerID(sSI70XX.timer, (void *) psEWP);
+	vTimerSetTimerID(sSI70XX.th, (void *) psEWP);
 	u8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
 	Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
 	u32_t Dly = (psEWP == &table_work[URI_SI70XX_RH]) ? si70xxDelayRH[Cfg] : si70xxDelayT[Cfg];
 	const u8_t * pCMD = (psEWP == &table_work[URI_SI70XX_RH]) ? &si70xxMRH_NHMM : &si70xxMT_NHMM;
 	IF_SYSTIMER_START(debugTIMING, stSI70XX);
-	return halI2C_Queue(sSI70XX.psI2C, i2cWT, (u8_t *) pCMD, 1, NULL, 0, (i2cq_p1_t) sSI70XX.timer, (i2cq_p2_t) (u32_t) Dly);
+	return halI2C_Queue(sSI70XX.psI2C, i2cWT, (u8_t *) pCMD, 1, NULL, 0, (i2cq_p1_t) sSI70XX.th, (i2cq_p2_t) (u32_t) Dly);
 }
 
 #endif
@@ -213,7 +213,7 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 	int res = psR->para.x32[AI][0].i32;
 	int htr = psR->para.x32[AI][1].i32;
 	int lev = psR->para.x32[AI][2].i32;
-	IF_P(ioB1GET(ioMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\r\n", Xcur, Xmax, res, htr, lev);
+	IF_P(ioB1GET(dbgMode), "MODE 'SI70XX' Xcur=%d Xmax=%d res=%d htr=%d lev=%d\r\n", Xcur, Xmax, res, htr, lev);
 
 	if (OUTSIDE(0, res, 3) ||
 		OUTSIDE(0, htr, 1) ||
@@ -284,7 +284,7 @@ int	si70xxConfig(i2c_di_t * psI2C_DI) {
 	psEWP->uri = URI_SI70XX_TMP;
 
 	#if (si70xxI2C_LOGIC == 3)
-	sSI70XX.timer = xTimerCreate("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr);
+	sSI70XX.th = xTimerCreateStatic("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr, &sSI70XX.ts);
 	#endif
 	IF_SYSTIMER_INIT(debugTIMING, stSI70XX, stMICROS, "SI70XX", 100, 10000);
 
