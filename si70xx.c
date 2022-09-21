@@ -114,7 +114,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	int iRV = halI2C_Queue(sSI70XX.psI2C, i2cWDR_B, (u8_t *) pCMD, sizeof(u8_t),
 			sSI70XX.u8Buf, SO_MEM(si70xx_t, u8Buf), (i2cq_p1_t) Dly, (i2cq_p2_t) NULL);
 	IF_SYSTIMER_STOP(debugTIMING, stSI70XX);
-	IF_PT(debugCONVERT, "uri=%d  [ %-`B ]", psEWP->uri, SO_MEM(si70xx_t, u8Buf), sSI70XX.u8Buf);
+	IF_PT(debugCONVERT, "uri=%d  [ %-'hhY ]", psEWP->uri, SO_MEM(si70xx_t, u8Buf), sSI70XX.u8Buf);
 	sSI70XX.RawVal = (sSI70XX.u8Buf[0] << 8) + sSI70XX.u8Buf[1];
 	x64_t X64;
 	if (psEWP == &table_work[URI_SI70XX_RH])
@@ -140,7 +140,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
 	int iRV = halI2C_Queue(sSI70XX.psI2C, i2cWR_B, (u8_t *) pCMD, sizeof(u8_t),
 			sSI70XX.u8Buf, SO_MEM(si70xx_t, u8Buf), (i2cq_p1_t) NULL, (i2cq_p2_t) NULL);
 	IF_SYSTIMER_STOP(debugTIMING, stSI70XX);
-	IF_PT(debugCONVERT, "uri=%d  [ %-`B ]", psEWP->uri, SO_MEM(si70xx_t, u8Buf), sSI70XX.u8Buf);
+	IF_PT(debugCONVERT, "uri=%d  [ %-'hhY ]", psEWP->uri, SO_MEM(si70xx_t, u8Buf), sSI70XX.u8Buf);
 	sSI70XX.RawVal = (sSI70XX.u8Buf[0] << 8) + sSI70XX.u8Buf[1];
 	x64_t X64;
 	if (psEWP == &table_work[URI_SI70XX_RH])
@@ -162,7 +162,7 @@ int	si70xxReadHdlr(epw_t * psEWP) {
  void si70xxReadCB(void * pvPara) {
 	IF_SYSTIMER_STOP(debugTIMING, stSI70XX);
 	epw_t * psEWP = pvPara;
-	IF_PT(debugCONVERT, "uri=%d  [ %-`B ]", psEWP->uri, SO_MEM(si70xx_t, u8Buf), sSI70XX.u8Buf);
+	IF_PT(debugCONVERT, "uri=%d  [ %-'hhY ]", psEWP->uri, SO_MEM(si70xx_t, u8Buf), sSI70XX.u8Buf);
 	sSI70XX.RawVal = (sSI70XX.u8Buf[0] << 8) + sSI70XX.u8Buf[1];
 	IF_P(debugCONVERT, "  Raw=%d", sSI70XX.RawVal);
 	x64_t X64;
@@ -256,7 +256,7 @@ int	si70xxIdentify(i2c_di_t * psI2C_DI) {
 	#if (debugCONFIG)
 	si70xxBuf[6] = si70xxBuf[7];
 	si70xxBuf[7] = si70xxBuf[8];
-	IF_P(debugCONFIG, "si70xx ID [ %-`B ]", 8, si70xxBuf);
+	IF_P(debugCONFIG, "si70xx ID [ %-'hhY ]", 8, si70xxBuf);
 	#endif
 	if ((iRV == erSUCCESS) && (si70xxBuf[4] == 0x06)) {
 		psI2C_DI->Type		= i2cDEV_SI70XX;
