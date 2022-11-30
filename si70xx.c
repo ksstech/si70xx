@@ -3,10 +3,9 @@
  * Copyright (c) 2022 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include "si70xx.h"
 #include "hal_variables.h"
+#include "si70xx.h"
 #include "endpoints.h"
-#include "options.h"
 #include "printfx.h"
 #include "syslog.h"
 #include "systiming.h"					// timing debugging
