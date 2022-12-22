@@ -7,6 +7,7 @@
 #include "si70xx.h"
 #include "endpoints.h"
 #include "printfx.h"
+#include "rules.h"
 #include "syslog.h"
 #include "systiming.h"					// timing debugging
 #include "x_errors_events.h"
