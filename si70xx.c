@@ -4,6 +4,7 @@
  */
 
 #include "hal_variables.h"
+#if (halHAS_SI70XX > 0)
 #include "si70xx.h"
 #include "endpoints.h"
 #include "printfx.h"
@@ -314,3 +315,4 @@ void si70xxReportAll(void) {
 			sSI70XX.sHCR.level, caLevel[sSI70XX.sHCR.level]);
 	}
 }
+#endif
