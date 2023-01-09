@@ -3,7 +3,7 @@
  * Copyright (c) 2022 Andre M. Maree / KSS Technologies (Pty) Ltd.
  */
 
-#include "hal_variables.h"
+#include "main.h"
 #if (halHAS_SI70XX > 0)
 #include "si70xx.h"
 #include "endpoints.h"
