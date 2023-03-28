@@ -51,8 +51,8 @@ typedef struct __attribute__((packed)) {				//
 DUMB_STATIC_ASSERT(sizeof(si70xx_hcr_t) == 1);
 
 typedef struct __attribute__((packed)) {				// SI70006/13/14/20/xx TMP & RH sensors
-	i2c_di_t *		psI2C;			// 4 bytes
-	SemaphoreHandle_t mux ;
+	i2c_di_t * psI2C;				// 4 bytes
+	SemaphoreHandle_t mux;
 	#if (si70xxI2C_LOGIC == 3)
 	TimerHandle_t th;
 	StaticTimer_t ts;
