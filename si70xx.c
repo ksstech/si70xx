@@ -314,5 +314,8 @@ void si70xxReportAll(void) {
 			sSI70XX.sUR1.htre  ? "EN" : "DIS",
 			sSI70XX.sHCR.level, caLevel[sSI70XX.sHCR.level]);
 	}
+	#if (si70xxI2C_LOGIC == 3)
+	xRtosReportTimer(NULL, sSI70XX.th);
+	#endif
 }
 #endif
