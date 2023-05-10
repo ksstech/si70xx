@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #include "endpoints.h"
-#include "hal_i2c.h"
+#include "hal_i2cm.h"
 
 #ifdef __cplusplus
 	extern "C" {
@@ -81,26 +81,26 @@ typedef struct __attribute__((packed)) {				// SI70006/13/14/20/xx TMP & RH sens
 
 // ###################################### Public functions #########################################
 
-int	si70xxConvertTemperature(si70xx_t * psSI70XX) ;
-int	si70xxReadSP(si70xx_t * psSI70XX, int Len) ;
-int	si70xxWriteSP(si70xx_t * psSI70XX) ;
-int	si70xxWriteEE(si70xx_t * psSI70XX) ;
+int	si70xxConvertTemperature(si70xx_t * psSI70XX);
+int	si70xxReadSP(si70xx_t * psSI70XX, int Len);
+int	si70xxWriteSP(si70xx_t * psSI70XX);
+int	si70xxWriteEE(si70xx_t * psSI70XX);
 
-int	si70xxInitialize(si70xx_t * psSI70XX) ;
-int	si70xxResetConfig(si70xx_t * psSI70XX) ;
-void si70xxReportAll(void) ;
+int	si70xxInitialize(si70xx_t * psSI70XX);
+int	si70xxResetConfig(si70xx_t * psSI70XX);
+void si70xxReportAll(void);
 
 // ##################################### I2C Task support ##########################################
 
-struct rule_t ;
+struct rule_t;
 int	si70xxConfigMode (struct rule_t *, int Xcur, int Xmax, int EI);
 int	si70xxIdentify(i2c_di_t * psI2C_DI);
 int	si70xxConfig(i2c_di_t * psI2C_DI);
 int	si70xxReConfig(i2c_di_t * psI2C_DI);
 int	si70xxDiags(i2c_di_t * psI2C_DI);
 
-struct epw_t ;
-int	si70xxReadHdlr(epw_t * psEWP);
+struct epw_t;
+int	si70xxSense(epw_t * psEWP);
 
 #ifdef __cplusplus
 	}
