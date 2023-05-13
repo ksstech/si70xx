@@ -276,12 +276,12 @@ exit:
 
 int	si70xxConfig(i2c_di_t * psI2C_DI) {
 	epw_t * psEWP = &table_work[URI_SI70XX_RH];
-	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1);
+	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1, 0);
 	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
 	psEWP->uri = URI_SI70XX_RH;
 
 	psEWP = &table_work[URI_SI70XX_TMP];
-	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1);
+	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1, 0);
 	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
 	psEWP->uri = URI_SI70XX_TMP;
 
