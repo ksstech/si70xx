@@ -304,19 +304,18 @@ int	si70xxDiags(i2c_di_t * psI2C_DI) { return erSUCCESS; }
 const char * caMode[] = { "H12T14", "H08T12", "H10T13", "H11T11" };
 const char * caLevel[] = { "3.09", "9.18", "15.24", "", "27.39", "", "", "", "51.69", "", "", "", "", "", "", "94.20" };
 
-void si70xxReportAll(void) {
+int si70xxReportAll(report_t * psR) {
+	int iRV = 0;
 	for (int dev = 0; dev < si70xxNumDev; ++dev) {
-		halI2C_DeviceReport(sSI70XX.psI2C);
+		iRV += halI2C_DeviceReport(psR, sSI70XX.psI2C);
 		u8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
 		Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
-		P("\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\r\n",
-			Cfg, caMode[Cfg],
-			sSI70XX.sUR1.vdds,
-			sSI70XX.sUR1.htre  ? "EN" : "DIS",
-			sSI70XX.sHCR.level, caLevel[sSI70XX.sHCR.level]);
+		iRV += wprintfx(psR, "\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\r\n", Cfg, caMode[Cfg],
+			sSI70XX.sUR1.vdds, sSI70XX.sUR1.htre  ? "EN" : "DIS", sSI70XX.sHCR.level, caLevel[sSI70XX.sHCR.level]);
 	}
 	#if (si70xxI2C_LOGIC == 3)
-	xRtosReportTimer(NULL, sSI70XX.th);
+	iRV += xRtosReportTimer(psR, sSI70XX.th);
 	#endif
+	return iRV;
 }
 #endif
