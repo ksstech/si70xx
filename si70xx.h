@@ -87,7 +87,7 @@ int	si70xxWriteEE(si70xx_t * psSI70XX);
 
 int	si70xxInitialize(si70xx_t * psSI70XX);
 int	si70xxResetConfig(si70xx_t * psSI70XX);
-void si70xxReportAll(report_t * psR);
+int si70xxReportAll(report_t * psR);
 
 // ##################################### I2C Task support ##########################################
 
