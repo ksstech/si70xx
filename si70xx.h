@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include <stdint.h>
-
+#include "hal_i2c_common.h"
 #include "endpoints.h"
-#include "hal_i2cm.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 	extern "C" {

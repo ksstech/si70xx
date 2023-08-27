@@ -102,7 +102,7 @@ int si70xxModeGet(void) {
 #if (si70xxI2C_LOGIC == 1)
 
 /**
- * @brief	trigger A->D conversion with clock stretching
+ * @brief	trigger A->D conversion with delay
  * @param 	pointer to endpoint to be read
  */
 int	si70xxSense(epw_t * psEWP) {
@@ -132,7 +132,7 @@ int	si70xxSense(epw_t * psEWP) {
 #elif (si70xxI2C_LOGIC == 2)
 
 /**
- * @brief	trigger A->D conversion with clock stretching
+ * @brief	trigger A->D conversion without delay (clock stretching ?)
  * @param 	pointer to endpoint to be read
  */
 int	si70xxSense(epw_t * psEWP) {
@@ -186,8 +186,15 @@ int	si70xxSense(epw_t * psEWP) {
  * @param 	(expired) timer handle
  */
 void si70xxTimerHdlr(TimerHandle_t xTimer) {
-	halI2CM_Queue(sSI70XX.psI2C, i2cRC_B, NULL, 0, sSI70XX.u8Buf, SO_MEM(si70xx_t, u8Buf),
-			(i2cq_p1_t) si70xxReadCB, (i2cq_p2_t) (void *) pvTimerGetTimerID(xTimer));
+	halI2CM_Queue(sSI70XX.psI2C, i2cRC_B, NULL, 0, sSI70XX.u8Buf, SO_MEM(si70xx_t, u8Buf), (i2cq_p1_t) si70xxReadCB, (i2cq_p2_t) (void *) pvTimerGetTimerID(xTimer));
+}
+
+void si70xxSenseCB(void * pV) {
+	epw_t * psEWP = (epw_t *) pV;
+	u8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
+	Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
+	u32_t Dly = (psEWP == &table_work[URI_SI70XX_RH]) ? si70xxDelayRH[Cfg] : si70xxDelayT[Cfg];
+	xTimerStart(sSI70XX.th, Dly);
 }
 
 /**
@@ -195,14 +202,12 @@ void si70xxTimerHdlr(TimerHandle_t xTimer) {
  * @param 	pointer to endpoint to be read
  */
 int	si70xxSense(epw_t * psEWP) {
+	// mark endpoint as BUSY
 	table_work[psEWP->uri == URI_SI70XX_RH ? URI_SI70XX_TMP : URI_SI70XX_RH].fBusy = 1;
 	vTimerSetTimerID(sSI70XX.th, (void *) psEWP);
-	u8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
-	Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
-	u32_t Dly = (psEWP == &table_work[URI_SI70XX_RH]) ? si70xxDelayRH[Cfg] : si70xxDelayT[Cfg];
 	const u8_t * pCMD = (psEWP == &table_work[URI_SI70XX_RH]) ? &si70xxMRH_NHMM : &si70xxMT_NHMM;
 	IF_SYSTIMER_START(debugTIMING, stSI70XX);
-	return halI2CM_Queue(sSI70XX.psI2C, i2cWT, (u8_t *) pCMD, 1, NULL, 0, (i2cq_p1_t) sSI70XX.th, (i2cq_p2_t) (u32_t) Dly);
+	return halI2CM_Queue(sSI70XX.psI2C, i2cWC, (u8_t *) pCMD, 1, NULL, 0, (i2cq_p1_t) si70xxSenseCB, (i2cq_p2_t) psEWP);
 }
 
 #endif
@@ -263,7 +268,7 @@ int	si70xxIdentify(i2c_di_t * psI2C_DI) {
 	if ((iRV == erSUCCESS) && (si70xxBuf[4] == 0x06)) {
 		psI2C_DI->Type		= i2cDEV_SI70XX;
 		psI2C_DI->Speed		= i2cSPEED_400;
-		psI2C_DI->DevIdx 	= si70xxNumDev++ ;
+		psI2C_DI->DevIdx 	= si70xxNumDev++;
 		#if (debugDEVICE)
 		si70xxWriteRead(si70xxRFWR, sizeof(si70xxRFWR), si70xxBuf, 1);
 		P("  FW Rev=%d\r\n", si70xxBuf[0] == 0xFF ? 1 : si70xxBuf[0] == 0x20 ? 2 : -1);
@@ -271,10 +276,19 @@ int	si70xxIdentify(i2c_di_t * psI2C_DI) {
 	}
 exit:
 //	psI2C_DI->Test = 0;				// Leave ON to remove timeout errors
-	return iRV ;
+	return iRV;
 }
 
 int	si70xxConfig(i2c_di_t * psI2C_DI) {
+	int iRV = si70xxReConfig(psI2C_DI);
+	#if (si70xxI2C_LOGIC == 3)
+	sSI70XX.th = xTimerCreateStatic("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr, &sSI70XX.ts);
+	#endif
+	IF_SYSTIMER_INIT(debugTIMING, stSI70XX, stMICROS, "SI70XX", 100, 10000);
+	return iRV;
+}
+
+int si70xxReConfig(i2c_di_t * psI2C_DI) {
 	epw_t * psEWP = &table_work[URI_SI70XX_RH];
 	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1, 0);
 	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
@@ -285,17 +299,10 @@ int	si70xxConfig(i2c_di_t * psI2C_DI) {
 	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
 	psEWP->uri = URI_SI70XX_TMP;
 
-	#if (si70xxI2C_LOGIC == 3)
-	sSI70XX.th = xTimerCreateStatic("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr, &sSI70XX.ts);
-	#endif
-	IF_SYSTIMER_INIT(debugTIMING, stSI70XX, stMICROS, "SI70XX", 100, 10000);
-
 	si70xxModeGet();
 	si70xxModeSet(si70xxMODE_H08T12);
-	return erSUCCESS ;
+	return erSUCCESS;
 }
-
-int si70xxReConfig(i2c_di_t * psI2C_DI) { return erSUCCESS; }
 
 int	si70xxDiags(i2c_di_t * psI2C_DI) { return erSUCCESS; }
 
