@@ -237,7 +237,7 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
 			iRV = si70xxWriteReg(si70xxWHCR, sSI70XX.sHCR.level = lev);
 		if (iRV < erSUCCESS)
 			break;
-	} while (++Xcur < Xmax) ;
+	} while (++Xcur < Xmax);
 	return iRV;
 }
 
