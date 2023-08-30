@@ -247,12 +247,12 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
  * @brief	device reset+register reads to ascertain exact device type
  * @return	erSUCCESS if supported device was detected, if not erFAILURE
  */
-int	si70xxIdentify(i2c_di_t * psI2C_DI) {
+int	si70xxIdentify(i2c_di_t * psI2C) {
 	u8_t si70xxBuf[10];
-	psI2C_DI->TRXmS	= 50;
-	psI2C_DI->CLKuS = 13000;			// Max 13000 (13mS)
-	psI2C_DI->Test = 1;
-	sSI70XX.psI2C = psI2C_DI;
+	psI2C->TRXmS = 50;
+	psI2C->CLKuS = 13000;			// Max 13000 (13mS)
+	psI2C->Test = 1;
+	sSI70XX.psI2C = psI2C;
 	int iRV = si70xxWriteRead(si70xxREID1, sizeof(si70xxREID1), &si70xxBuf[0], 8);
 	IF_EXIT(iRV != erSUCCESS);
 	#if (debugDEVICE)
@@ -266,29 +266,28 @@ int	si70xxIdentify(i2c_di_t * psI2C_DI) {
 	IF_P(debugDEVICE, "si70xx ID [ %-'hhY ]", 8, si70xxBuf);
 	#endif
 	if ((iRV == erSUCCESS) && (si70xxBuf[4] == 0x06)) {
-		psI2C_DI->Type		= i2cDEV_SI70XX;
-		psI2C_DI->Speed		= i2cSPEED_400;
-		psI2C_DI->DevIdx 	= si70xxNumDev++;
+		psI2C->Type = i2cDEV_SI70XX;
+		psI2C->Speed = i2cSPEED_400;
+		psI2C->DevIdx = si70xxNumDev++;
 		#if (debugDEVICE)
 		si70xxWriteRead(si70xxRFWR, sizeof(si70xxRFWR), si70xxBuf, 1);
 		P("  FW Rev=%d\r\n", si70xxBuf[0] == 0xFF ? 1 : si70xxBuf[0] == 0x20 ? 2 : -1);
 		#endif
 	}
 exit:
-//	psI2C_DI->Test = 0;				// Leave ON to remove timeout errors
+//	psI2C->Test = 0;				// Leave ON to remove timeout errors
 	return iRV;
 }
 
-int	si70xxConfig(i2c_di_t * psI2C_DI) {
-	int iRV = si70xxReConfig(psI2C_DI);
+int	si70xxConfig(i2c_di_t * psI2C) {
 	#if (si70xxI2C_LOGIC == 3)
 	sSI70XX.th = xTimerCreateStatic("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr, &sSI70XX.ts);
 	#endif
 	IF_SYSTIMER_INIT(debugTIMING, stSI70XX, stMICROS, "SI70XX", 100, 10000);
-	return iRV;
+	return si70xxReConfig(psI2C);
 }
 
-int si70xxReConfig(i2c_di_t * psI2C_DI) {
+int si70xxReConfig(i2c_di_t * psI2C) {
 	epw_t * psEWP = &table_work[URI_SI70XX_RH];
 	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1, 0);
 	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
@@ -304,7 +303,7 @@ int si70xxReConfig(i2c_di_t * psI2C_DI) {
 	return erSUCCESS;
 }
 
-int	si70xxDiags(i2c_di_t * psI2C_DI) { return erSUCCESS; }
+int	si70xxDiags(i2c_di_t * psI2C) { return erSUCCESS; }
 
 // ######################################### Reporting #############################################
 

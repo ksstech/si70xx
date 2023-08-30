@@ -93,10 +93,10 @@ int si70xxReportAll(report_t * psR);
 
 struct rule_t;
 int	si70xxConfigMode (struct rule_t *, int Xcur, int Xmax, int EI);
-int	si70xxIdentify(i2c_di_t * psI2C_DI);
-int	si70xxConfig(i2c_di_t * psI2C_DI);
-int	si70xxReConfig(i2c_di_t * psI2C_DI);
-int	si70xxDiags(i2c_di_t * psI2C_DI);
+int	si70xxIdentify(i2c_di_t * psI2C);
+int	si70xxConfig(i2c_di_t * psI2C);
+int	si70xxReConfig(i2c_di_t * psI2C);
+int	si70xxDiags(i2c_di_t * psI2C);
 
 struct epw_t;
 int	si70xxSense(epw_t * psEWP);
