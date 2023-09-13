@@ -6,9 +6,7 @@
 #include "hal_config.h"
 
 #if (halHAS_SI70XX > 0)
-#include "si70xx.h"
-#include "endpoints.h"
-#include "options.h"
+#include "hal_i2c_common.h"
 #include "printfx.h"
 #include "rules.h"
 #include "syslog.h"
@@ -300,6 +298,7 @@ int si70xxReConfig(i2c_di_t * psI2C) {
 
 	si70xxModeGet();
 	si70xxModeSet(si70xxMODE_H08T12);
+	xRtosSetDevice(devMASK_SI70XX);
 	return erSUCCESS;
 }
 

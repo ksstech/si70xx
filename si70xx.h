@@ -1,12 +1,8 @@
 /*
- * Copyright 2022 Andre M. Maree/KSS Technologies (Pty) Ltd.
+ * si70xx.h - Copyright (c) 2022-23 Andre M. Maree/KSS Technologies (Pty) Ltd.
  */
 
 #pragma once
-
-#include "hal_i2c_common.h"
-#include "endpoints.h"
-#include <stdint.h>
 
 #ifdef __cplusplus
 	extern "C" {
