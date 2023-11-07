@@ -278,28 +278,25 @@ exit:
 }
 
 int	si70xxConfig(i2c_di_t * psI2C) {
-	#if (si70xxI2C_LOGIC == 3)
-	sSI70XX.th = xTimerCreateStatic("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr, &sSI70XX.ts);
-	#endif
-	IF_SYSTIMER_INIT(debugTIMING, stSI70XX, stMICROS, "SI70XX", 100, 10000);
-	return si70xxReConfig(psI2C);
-}
+	if (!psI2C->IDok) return erINV_STATE;
 
-int si70xxReConfig(i2c_di_t * psI2C) {
-	epw_t * psEWP = &table_work[URI_SI70XX_RH];
-	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1, 0);
-	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
-	psEWP->uri = URI_SI70XX_RH;
+	psI2C->CFGok = 0;
+	int iRV = si70xxModeGet();
+	if (iRV < erSUCCESS) goto exit;
 
-	psEWP = &table_work[URI_SI70XX_TMP];
-	psEWP->var.def = SETDEF_CVAR(0, 0, vtVALUE, cvF32, 1, 0);
-	psEWP->Tsns = psEWP->Rsns = SI70XX_T_SNS;
-	psEWP->uri = URI_SI70XX_TMP;
+	iRV = si70xxModeSet(si70xxMODE_H08T12);
+	if (iRV < erSUCCESS) goto exit;
+	psI2C->CFGok = 1;
 
-	si70xxModeGet();
-	si70xxModeSet(si70xxMODE_H08T12);
-	xRtosSetDevice(devMASK_SI70XX);
-	return erSUCCESS;
+	// once off init....
+	if (!psI2C->CFGerr) {
+		IF_SYSTIMER_INIT(debugTIMING, stSI70XX, stMICROS, "SI70XX", 100, 10000);
+		#if (si70xxI2C_LOGIC == 3)
+		sSI70XX.th = xTimerCreateStatic("si70xx", pdMS_TO_TICKS(5), pdFALSE, NULL, si70xxTimerHdlr, &sSI70XX.ts);
+		#endif
+	}
+exit:
+	return iRV;
 }
 
 int	si70xxDiags(i2c_di_t * psI2C) { return erSUCCESS; }
