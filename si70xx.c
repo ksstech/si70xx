@@ -246,16 +246,16 @@ int	si70xxConfigMode (struct rule_t * psR, int Xcur, int Xmax, int EI) {
  * @return	erSUCCESS if supported device was detected, if not erFAILURE
  */
 int	si70xxIdentify(i2c_di_t * psI2C) {
-	u8_t si70xxBuf[10];
-	psI2C->TRXmS = 50;
-	psI2C->CLKuS = 13000;			// Max 13000 (13mS)
-	psI2C->Test = 1;
 	sSI70XX.psI2C = psI2C;
+	psI2C->Type = i2cDEV_SI70XX;
+	psI2C->Speed = i2cSPEED_400;
+	psI2C->TObus = 50;	// 1000 13000
+	psI2C->Test = 1;
+	u8_t si70xxBuf[10];
 	int iRV = si70xxWriteRead(si70xxREID1, sizeof(si70xxREID1), &si70xxBuf[0], 8);
-	IF_EXIT(iRV != erSUCCESS);
+	if (iRV != erSUCCESS) goto exit;
 	#if (debugDEVICE)
-	for (int i = 0; i < 8; i += 2)
-		si70xxBuf[i >> 1] = si70xxBuf[i + 1];
+	for (int i = 0; i < 8; i += 2) si70xxBuf[i >> 1] = si70xxBuf[i + 1];
 	#endif
 	iRV = si70xxWriteRead(si70xxREID2, sizeof(si70xxREID2), &si70xxBuf[4], 6);
 	#if (debugDEVICE)
@@ -263,17 +263,19 @@ int	si70xxIdentify(i2c_di_t * psI2C) {
 	si70xxBuf[7] = si70xxBuf[8];
 	IF_P(debugDEVICE, "si70xx ID [ %-'hhY ]", 8, si70xxBuf);
 	#endif
-	if ((iRV == erSUCCESS) && (si70xxBuf[4] == 0x06)) {
-		psI2C->Type = i2cDEV_SI70XX;
-		psI2C->Speed = i2cSPEED_400;
-		psI2C->DevIdx = si70xxNumDev++;
-		#if (debugDEVICE)
-		si70xxWriteRead(si70xxRFWR, sizeof(si70xxRFWR), si70xxBuf, 1);
-		P("  FW Rev=%d\r\n", si70xxBuf[0] == 0xFF ? 1 : si70xxBuf[0] == 0x20 ? 2 : -1);
-		#endif
-	}
+	if (iRV < erSUCCESS) goto exit;
+	if (si70xxBuf[4] != 0x06) goto err_version;
+	psI2C->DevIdx = si70xxNumDev++;
+	psI2C->IDok = 1;
+	psI2C->Test = 0;
+	#if (debugDEVICE)
+	si70xxWriteRead(si70xxRFWR, sizeof(si70xxRFWR), si70xxBuf, 1);
+	P("  FW Rev=%d\r\n", si70xxBuf[0] == 0xFF ? 1 : si70xxBuf[0] == 0x20 ? 2 : -1);
+	#endif
+	goto exit;
+err_version:
+	iRV = erINV_VERSION;
 exit:
-//	psI2C->Test = 0;				// Leave ON to remove timeout errors
 	return iRV;
 }
 
