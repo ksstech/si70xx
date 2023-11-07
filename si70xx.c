@@ -6,9 +6,11 @@
 #include "hal_config.h"
 
 #if (halHAS_SI70XX > 0)
+#include "endpoints.h"
 #include "hal_i2c_common.h"
 #include "printfx.h"
 #include "rules.h"
+#include "si70xx.h"
 #include "syslog.h"
 #include "systiming.h"					// timing debugging
 #include "x_errors_events.h"
@@ -24,19 +26,12 @@
 
 // ############################################# Macros ############################################
 
-#define	si70xxI2C_LOGIC				1					// 1=delay 2=stretch, 3=stages
 
 // #################################### SI7006/13/20/21 Addresses ##################################
 
 #define	si70xxADDR0					0x40				// SI702x, SI700x address
 #define	si70xxADDR1					0x41				// SI701X address
 
-#define	si70xxMODE_H12T14			0					// 12 + 11
-#define	si70xxMODE_H08T12			1					// 4 + 4
-#define	si70xxMODE_H10T13			2					// 5 + 7
-#define	si70xxMODE_H11T11			3					// 7 + 3
-
-#define	SI70XX_T_SNS				60000
 #define SI70XX_MS_tPU				80					// Tpowerup worst case
 
 
