@@ -70,20 +70,26 @@ u8_t si70xxNumDev;
 // #################################### Local ONLY functions #######################################
 
 static int si70xxWrite(const u8_t * pTxBuf, size_t TxLen) {
-	return halI2C_Queue(sSI70XX.psI2C, i2cW_B, (u8_t *) pTxBuf, TxLen,
-			NULL, 0, (i2cq_p1_t) NULL, (i2cq_p2_t) NULL);
+	IF_SYSTIMER_START(debugTIMING, stSI70XX);
+	int iRV = halI2C_Queue(sSI70XX.psI2C, i2cW_B, (u8_t *) pTxBuf, TxLen, NULL, 0, (i2cq_p1_t) NULL, (i2cq_p2_t) NULL);
+	IF_SYSTIMER_STOP(debugTIMING, stSI70XX);
+	return iRV;
 }
 
-static int si70xxWriteReg(u8_t Reg, u8_t Val) {
-	u8_t caBuf[2];
-	caBuf[0] = Reg;
-	caBuf[1] = Val;
-	return si70xxWrite(caBuf, sizeof(caBuf));
+int si70xxWriteReg(u8_t Reg, u8_t Val) {
+	u8_t caBuf[2] = { Reg, Val };
+	IF_SYSTIMER_START(debugTIMING, stSI70XX);
+	int iRV = si70xxWrite(caBuf, sizeof(caBuf));
+	IF_SYSTIMER_STOP(debugTIMING, stSI70XX);
+	return iRV;
 }
 
 static int si70xxWriteRead(const u8_t * pTxBuf, size_t TxLen, u8_t * pRxBuf, size_t RxLen) {
-	return halI2C_Queue(sSI70XX.psI2C, i2cWR_B, (u8_t *) pTxBuf, TxLen,
+	IF_SYSTIMER_START(debugTIMING, stSI70XX);
+	int iRV = halI2C_Queue(sSI70XX.psI2C, i2cWR_B, (u8_t *) pTxBuf, TxLen,
 			pRxBuf, RxLen, (i2cq_p1_t) NULL, (i2cq_p2_t) NULL);
+	IF_SYSTIMER_STOP(debugTIMING, stSI70XX);
+	return iRV;
 }
 
 int si70xxModeSet(int Mode) {
