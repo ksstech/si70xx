@@ -5,7 +5,7 @@
 #pragma once
 
 #ifdef __cplusplus
-	extern "C" {
+extern "C" {
 #endif
 
 // ########################################### Macros ##############################################
@@ -100,7 +100,6 @@ extern si70xx_t sSI70XX;
 
 int si70xxWriteReg(u8_t Reg, u8_t Val);
 
-
 int	si70xxConvertTemperature(si70xx_t * psSI70XX);
 int	si70xxReadSP(si70xx_t * psSI70XX, int Len);
 int	si70xxWriteSP(si70xx_t * psSI70XX);
@@ -124,5 +123,5 @@ struct epw_t;
 int	si70xxSense(struct epw_t * psEWP);
 
 #ifdef __cplusplus
-	}
+}
 #endif
