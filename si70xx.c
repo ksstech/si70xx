@@ -1,6 +1,6 @@
 // si70cc.c - Copyright (c) 2022-24 Andre M. Maree / KSS Technologies (Pty) Ltd.
 
-#include "hal_config.h"
+#include "hal_platform.h"
 
 #if (HAL_SI70XX > 0)
 #include "endpoints.h"
