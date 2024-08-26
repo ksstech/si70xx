@@ -1,5 +1,4 @@
 # SI70xx
-
 set( srcs "si70xx.c" )
 set( include_dirs "." )
 set( priv_include_dirs )
