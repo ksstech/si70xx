@@ -5,7 +5,7 @@
 #if (HAL_SI70XX > 0)
 #include "endpoints.h"
 #include "hal_i2c_common.h"
-#include "printfx.h"
+#include "report.h"
 #include "rules.h"
 #include "si70xx.h"
 #include "syslog.h"
