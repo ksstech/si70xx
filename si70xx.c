@@ -170,7 +170,7 @@ int si70xxReportAll(report_t * psR) {
 		iRV += halI2C_DeviceReport(psR, sSI70XX.psI2C);
 		u8_t Cfg = sSI70XX.sUR1.cfg1 ? 2 : 0;
 		Cfg += sSI70XX.sUR1.cfg0 ? 1 : 0;
-		iRV += wprintfx(psR, "\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\r\n", Cfg, caMode[Cfg],
+		iRV += xReport(psR, "\tMode=%d (%s)  VddS=%d  Heater=%sabled  Level=%d (%s)\r\n", Cfg, caMode[Cfg],
 			sSI70XX.sUR1.vdds, sSI70XX.sUR1.htre  ? "EN" : "DIS", sSI70XX.sHCR.level, caLevel[sSI70XX.sHCR.level]);
 	}
 	#if (si70xxI2C_LOGIC == 3)
